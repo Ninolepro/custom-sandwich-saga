@@ -2,11 +2,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle, ArrowLeft, Phone } from "lucide-react";
+import { CheckCircle, ArrowLeft, Phone, Bell } from "lucide-react";
+import { useCart } from "../context/CartContext";
+import { OrderDetails } from "../types";
+import { toast } from "sonner";
 
 const ConfirmationPage = () => {
   const navigate = useNavigate();
-  const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const [notificationSent, setNotificationSent] = useState(false);
+  const { sendOrderNotification } = useCart();
   
   useEffect(() => {
     // Retrieve order details from localStorage
@@ -16,8 +21,19 @@ const ConfirmationPage = () => {
       return;
     }
     
-    setOrderDetails(JSON.parse(details));
-  }, [navigate]);
+    const parsedDetails = JSON.parse(details);
+    setOrderDetails(parsedDetails);
+    
+    // Envoyer automatiquement la notification au préparateur
+    const sendNotification = async () => {
+      if (parsedDetails && !notificationSent) {
+        await sendOrderNotification(parsedDetails);
+        setNotificationSent(true);
+      }
+    };
+    
+    sendNotification();
+  }, [navigate, sendOrderNotification, notificationSent]);
 
   if (!orderDetails) {
     return null;
@@ -35,6 +51,15 @@ const ConfirmationPage = () => {
     hour: "2-digit",
     minute: "2-digit"
   });
+
+  const handleResendNotification = async () => {
+    if (orderDetails) {
+      const success = await sendOrderNotification(orderDetails);
+      if (success) {
+        setNotificationSent(true);
+      }
+    }
+  };
 
   return (
     <div className="page-transition container mx-auto px-4 py-12">
@@ -59,6 +84,26 @@ const ConfirmationPage = () => {
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Merci pour votre commande! Un SMS de confirmation a été envoyé à votre numéro de téléphone.
         </p>
+        
+        <div className="flex items-center justify-center mt-4">
+          <div className={`flex items-center ${notificationSent ? 'text-green-600' : 'text-amber-600'} bg-muted px-4 py-2 rounded-full`}>
+            <Bell className="h-4 w-4 mr-2" />
+            <span className="text-sm font-medium">
+              {notificationSent 
+                ? "Notification envoyée au préparateur" 
+                : "Notification en attente d'envoi"}
+            </span>
+          </div>
+        </div>
+        
+        {!notificationSent && (
+          <button 
+            onClick={handleResendNotification}
+            className="mt-4 text-sandwich hover:text-sandwich-dark underline text-sm"
+          >
+            Renvoyer la notification
+          </button>
+        )}
       </motion.div>
       
       <div className="max-w-4xl mx-auto">
@@ -109,7 +154,7 @@ const ConfirmationPage = () => {
           <h3 className="text-sm font-medium text-muted-foreground uppercase mb-4">Détails de votre commande</h3>
           
           <div className="space-y-4 mb-8">
-            {orderDetails.orderItems.map((item: any) => (
+            {orderDetails.orderItems.map((item) => (
               <div key={item.id} className="flex items-center space-x-4 py-3 border-b border-muted">
                 <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden">
                   <img 

@@ -1,6 +1,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { CartContextType, CartItemType, Sandwich } from "../types";
+import { CartContextType, CartItemType, Sandwich, OrderDetails } from "../types";
+import { toast } from "sonner";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -46,8 +47,35 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart([]);
   };
   
+  const sendOrderNotification = async (orderDetails: OrderDetails): Promise<boolean> => {
+    try {
+      // Simulation d'un appel à une API pour envoyer une notification
+      console.log("Envoi de la notification au préparateur:", orderDetails);
+      
+      // Dans un environnement de production, vous appelleriez ici votre API
+      // Par exemple: await fetch('https://votre-api.com/notifications', {method: 'POST', body: JSON.stringify(orderDetails)})
+      
+      // Simulation d'attente pour une meilleure expérience utilisateur
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success("Notification envoyée au préparateur de sandwiches");
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de l'envoi de la notification:", error);
+      toast.error("Échec de l'envoi de la notification au préparateur");
+      return false;
+    }
+  };
+  
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart }}>
+    <CartContext.Provider value={{ 
+      cart, 
+      addToCart, 
+      removeFromCart, 
+      updateQuantity, 
+      clearCart,
+      sendOrderNotification
+    }}>
       {children}
     </CartContext.Provider>
   );

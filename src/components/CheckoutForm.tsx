@@ -4,11 +4,12 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { CustomerInfo } from "../types";
 
 const CheckoutForm = () => {
   const { cart, clearCart } = useCart();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CustomerInfo>({
     firstName: "",
     lastName: "",
     phone: "",
