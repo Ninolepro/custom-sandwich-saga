@@ -24,6 +24,14 @@ const PromoCodeInput = () => {
     setIsLoading(false);
   };
 
+  const handleRemovePromo = () => {
+    // Réinitialise le code promo dans le contexte du panier
+    setPromoCode("");
+    // Réinitialise également l'input local
+    setInputCode("");
+    toast.success("Code promo supprimé");
+  };
+
   return (
     <div className="border border-dashed border-muted rounded-lg p-4 space-y-3">
       <p className="text-sm font-medium">Avez-vous un code promo?</p>
@@ -54,10 +62,7 @@ const PromoCodeInput = () => {
           <Button 
             variant="outline" 
             className="shrink-0"
-            onClick={() => {
-              setPromoCode("");
-              setInputCode("");
-            }}
+            onClick={handleRemovePromo}
           >
             Supprimer
           </Button>
