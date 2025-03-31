@@ -3,70 +3,35 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import SandwichCard from "../components/SandwichCard";
 import { Sandwich } from "../types";
-
-const sandwichData: Sandwich[] = [
-  {
-    id: "americain",
-    name: "L'Américain",
-    description: "Steak haché, cheddar, salade, tomate, oignon, sauce spéciale",
-    price: 8.50,
-    image: "/placeholder.svg",
-    quantity: 1
-  },
-  {
-    id: "boulette",
-    name: "Le Boulette",
-    description: "Boulettes de viande, sauce tomate, emmental fondu, oignons caramélisés",
-    price: 7.90,
-    image: "/placeholder.svg",
-    quantity: 1
-  },
-  {
-    id: "poulet",
-    name: "Le Poulet Grillé",
-    description: "Poulet grillé mariné, avocat, roquette, tomate, sauce curry",
-    price: 8.20,
-    image: "/placeholder.svg",
-    quantity: 1
-  },
-  {
-    id: "vegetarien",
-    name: "Le Végétarien",
-    description: "Aubergines grillées, houmous, poivrons, roquette, tomate séchée",
-    price: 7.50,
-    image: "/placeholder.svg",
-    quantity: 1
-  },
-  {
-    id: "mediterraneen",
-    name: "Le Méditerranéen",
-    description: "Jambon cru, mozzarella, pesto, tomates séchées, roquette",
-    price: 8.90,
-    image: "/placeholder.svg",
-    quantity: 1
-  },
-  {
-    id: "nordique",
-    name: "Le Nordique",
-    description: "Saumon fumé, crème citronnée, concombre, aneth",
-    price: 9.50,
-    image: "/placeholder.svg",
-    quantity: 1
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const HomePage = () => {
   const [sandwiches, setSandwiches] = useState<Sandwich[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Simulate loading data from an API
-    const timer = setTimeout(() => {
-      setSandwiches(sandwichData);
+    const fetchSandwiches = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('sandwiches')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error("Erreur lors du chargement des sandwichs:", error);
+      } else {
+        // Convertir les données pour correspondre au type Sandwich
+        const formattedData: Sandwich[] = (data || []).map(item => ({
+          ...item,
+          id: item.id,
+          quantity: 1
+        }));
+        setSandwiches(formattedData);
+      }
       setIsLoading(false);
-    }, 800);
+    };
     
-    return () => clearTimeout(timer);
+    fetchSandwiches();
   }, []);
 
   return (

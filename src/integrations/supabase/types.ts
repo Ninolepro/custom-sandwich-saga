@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ingredients: {
+        Row: {
+          created_at: string
+          id: string
+          image: string | null
+          name: string
+          price: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image?: string | null
+          name: string
+          price: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image?: string | null
+          name?: string
+          price?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       promo_codes: {
         Row: {
           active: boolean | null
@@ -42,6 +72,36 @@ export type Database = {
           discount?: number
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sandwiches: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          image: string | null
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          image?: string | null
+          name: string
+          price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          image?: string | null
+          name?: string
+          price?: number
+          updated_at?: string
         }
         Relationships: []
       }

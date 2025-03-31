@@ -1,9 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Option {
   id: string;
@@ -12,39 +13,6 @@ interface Option {
   image?: string;
 }
 
-const breadOptions: Option[] = [
-  { id: "baguette", name: "Baguette traditionnelle", price: 2.0, image: "/placeholder.svg" },
-  { id: "ciabatta", name: "Ciabatta", price: 2.5, image: "/placeholder.svg" },
-  { id: "complete", name: "Pain complet", price: 2.2, image: "/placeholder.svg" },
-  { id: "cereales", name: "Pain aux céréales", price: 2.8, image: "/placeholder.svg" },
-];
-
-const proteinOptions: Option[] = [
-  { id: "jambon", name: "Jambon blanc", price: 2.0, image: "/placeholder.svg" },
-  { id: "poulet", name: "Poulet rôti", price: 2.5, image: "/placeholder.svg" },
-  { id: "boeuf", name: "Rôti de bœuf", price: 3.0, image: "/placeholder.svg" },
-  { id: "thon", name: "Thon mayonnaise", price: 2.5, image: "/placeholder.svg" },
-  { id: "omelette", name: "Omelette", price: 2.0, image: "/placeholder.svg" },
-];
-
-const veggieOptions: Option[] = [
-  { id: "salade", name: "Salade", price: 0.5, image: "/placeholder.svg" },
-  { id: "tomate", name: "Tomate", price: 0.5, image: "/placeholder.svg" },
-  { id: "concombre", name: "Concombre", price: 0.5, image: "/placeholder.svg" },
-  { id: "oignon", name: "Oignon rouge", price: 0.3, image: "/placeholder.svg" },
-  { id: "poivron", name: "Poivron", price: 0.5, image: "/placeholder.svg" },
-  { id: "olive", name: "Olives", price: 0.6, image: "/placeholder.svg" },
-];
-
-const sauceOptions: Option[] = [
-  { id: "mayonnaise", name: "Mayonnaise", price: 0.3, image: "/placeholder.svg" },
-  { id: "moutarde", name: "Moutarde", price: 0.3, image: "/placeholder.svg" },
-  { id: "ketchup", name: "Ketchup", price: 0.3, image: "/placeholder.svg" },
-  { id: "bbq", name: "Sauce BBQ", price: 0.4, image: "/placeholder.svg" },
-  { id: "andalouse", name: "Sauce Andalouse", price: 0.4, image: "/placeholder.svg" },
-  { id: "aioli", name: "Aïoli", price: 0.5, image: "/placeholder.svg" },
-];
-
 const CustomSandwichBuilder = () => {
   const { addToCart } = useCart();
   const [activeStep, setActiveStep] = useState(0);
@@ -52,6 +20,71 @@ const CustomSandwichBuilder = () => {
   const [selectedProtein, setSelectedProtein] = useState<Option | null>(null);
   const [selectedVeggies, setSelectedVeggies] = useState<Option[]>([]);
   const [selectedSauces, setSelectedSauces] = useState<Option[]>([]);
+  
+  const [breadOptions, setBreadOptions] = useState<Option[]>([]);
+  const [proteinOptions, setProteinOptions] = useState<Option[]>([]);
+  const [veggieOptions, setVeggieOptions] = useState<Option[]>([]);
+  const [sauceOptions, setSauceOptions] = useState<Option[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    fetchIngredients();
+  }, []);
+
+  const fetchIngredients = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('ingredients')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error("Erreur lors du chargement des ingrédients:", error);
+        return;
+      }
+
+      if (data) {
+        // Trier les ingrédients par type
+        const breads = data.filter(item => item.type === 'bread').map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image
+        }));
+        
+        const proteins = data.filter(item => item.type === 'protein').map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image
+        }));
+        
+        const veggies = data.filter(item => item.type === 'veggie').map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image
+        }));
+        
+        const sauces = data.filter(item => item.type === 'sauce').map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image
+        }));
+        
+        setBreadOptions(breads);
+        setProteinOptions(proteins);
+        setVeggieOptions(veggies);
+        setSauceOptions(sauces);
+      }
+    } catch (err) {
+      console.error("Erreur:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const steps = [
     { title: "Pain", options: breadOptions, selection: selectedBread ? [selectedBread] : [] },
@@ -134,7 +167,7 @@ const CustomSandwichBuilder = () => {
         name: "Sandwich Personnalisé",
         description: `${selectedBread?.name} avec ${selectedProtein?.name}, ${selectedVeggies.map(v => v.name).join(", ")} et ${selectedSauces.length > 0 ? selectedSauces.map(s => s.name).join(", ") : "sans sauce"}`,
         price: getTotalPrice(),
-        image: "/placeholder.svg",
+        image: selectedProtein?.image || "/placeholder.svg",
         isCustom: true,
         ingredients: [
           selectedBread,
@@ -164,6 +197,14 @@ const CustomSandwichBuilder = () => {
       setActiveStep(activeStep - 1);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-4xl mx-auto flex justify-center items-center min-h-[400px]">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto">
