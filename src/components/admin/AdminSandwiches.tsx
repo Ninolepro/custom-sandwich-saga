@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Edit, Trash2, Save, X, Upload } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Save, X, Upload, Image } from "lucide-react";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
 const AdminSandwiches = () => {
@@ -52,7 +51,6 @@ const AdminSandwiches = () => {
       toast.error("Erreur lors du chargement des sandwichs");
       console.error(error);
     } else {
-      // Convertir les données pour correspondre au type Sandwich
       const formattedData: Sandwich[] = (data || []).map(item => ({
         ...item,
         id: item.id,
@@ -100,7 +98,6 @@ const AdminSandwiches = () => {
     try {
       let imageUrl = newSandwich.image || "/placeholder.svg";
       
-      // Upload de l'image si une est sélectionnée
       if (selectedFile) {
         const uploadedUrl = await uploadImage(selectedFile, newSandwich.name);
         if (uploadedUrl) {
@@ -152,7 +149,6 @@ const AdminSandwiches = () => {
       
       let imageUrl = currentSandwich.image || "/placeholder.svg";
       
-      // Upload de l'image si une est sélectionnée
       if (editSelectedFile) {
         const uploadedUrl = await uploadImage(editSelectedFile, currentSandwich.name);
         if (uploadedUrl) {
@@ -221,7 +217,7 @@ const AdminSandwiches = () => {
       }
     }
   };
-  
+
   const filteredSandwiches = sandwiches.filter(sandwich => 
     sandwich.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sandwich.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -229,7 +225,6 @@ const AdminSandwiches = () => {
 
   return (
     <>
-      {/* Section Ajout de sandwich */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-muted/60 mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Gérer les sandwichs</h2>

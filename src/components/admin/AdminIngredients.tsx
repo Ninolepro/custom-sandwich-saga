@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -20,7 +19,8 @@ import {
   Trash2, 
   Save, 
   X, 
-  Upload 
+  Upload, 
+  Image 
 } from "lucide-react";
 import { 
   Select, 
@@ -125,7 +125,6 @@ const AdminIngredients = () => {
     try {
       let imageUrl = newIngredient.image || "/placeholder.svg";
       
-      // Upload de l'image si une est sélectionnée
       if (selectedFile) {
         const uploadedUrl = await uploadImage(selectedFile, newIngredient.name);
         if (uploadedUrl) {
@@ -176,7 +175,6 @@ const AdminIngredients = () => {
       
       let imageUrl = currentIngredient.image || "/placeholder.svg";
       
-      // Upload de l'image si une est sélectionnée
       if (editSelectedFile) {
         const uploadedUrl = await uploadImage(editSelectedFile, currentIngredient.name);
         if (uploadedUrl) {
@@ -259,7 +257,6 @@ const AdminIngredients = () => {
 
   return (
     <>
-      {/* Section Ajout d'ingrédient */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-muted/60 mb-8">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
           <h2 className="text-xl font-semibold">Gérer les ingrédients</h2>
