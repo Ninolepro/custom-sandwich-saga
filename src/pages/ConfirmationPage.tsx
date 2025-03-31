@@ -1,201 +1,171 @@
 
-import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle, ArrowLeft, Phone, Bell } from "lucide-react";
-import { useCart } from "../context/CartContext";
 import { OrderDetails } from "../types";
-import { toast } from "sonner";
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 
 const ConfirmationPage = () => {
   const navigate = useNavigate();
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
-  const [notificationSent, setNotificationSent] = useState(false);
-  const { sendOrderNotification } = useCart();
   
   useEffect(() => {
-    // Retrieve order details from localStorage
-    const details = localStorage.getItem("orderDetails");
-    if (!details) {
+    const storedOrderDetails = localStorage.getItem("orderDetails");
+    
+    if (!storedOrderDetails) {
       navigate("/");
       return;
     }
     
-    const parsedDetails = JSON.parse(details);
-    setOrderDetails(parsedDetails);
-    
-    // Envoyer automatiquement la notification au préparateur
-    const sendNotification = async () => {
-      if (parsedDetails && !notificationSent) {
-        await sendOrderNotification(parsedDetails);
-        setNotificationSent(true);
-      }
-    };
-    
-    sendNotification();
-  }, [navigate, sendOrderNotification, notificationSent]);
-
+    try {
+      setOrderDetails(JSON.parse(storedOrderDetails));
+    } catch (e) {
+      console.error("Error parsing order details:", e);
+      navigate("/");
+    }
+  }, [navigate]);
+  
   if (!orderDetails) {
     return null;
   }
   
-  const formattedDate = new Date(orderDetails.orderDate).toLocaleString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-  
-  const expectedDelivery = new Date(new Date(orderDetails.orderDate).getTime() + 45 * 60000).toLocaleTimeString("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-  const handleResendNotification = async () => {
-    if (orderDetails) {
-      const success = await sendOrderNotification(orderDetails);
-      if (success) {
-        setNotificationSent(true);
-      }
-    }
-  };
-
   return (
     <div className="page-transition container mx-auto px-4 py-12">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-10"
+        className="mb-10 text-center"
       >
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="h-20 w-20 rounded-full bg-sandwich/20 flex items-center justify-center mx-auto mb-4"
-        >
-          <CheckCircle className="h-12 w-12 text-sandwich" />
-        </motion.div>
-        
-        <h1 className="text-4xl md:text-5xl font-bold mb-6">
-          Commande confirmée!
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Merci pour votre commande! Un SMS de confirmation a été envoyé à votre numéro de téléphone.
-        </p>
-        
-        <div className="flex items-center justify-center mt-4">
-          <div className={`flex items-center ${notificationSent ? 'text-green-600' : 'text-amber-600'} bg-muted px-4 py-2 rounded-full`}>
-            <Bell className="h-4 w-4 mr-2" />
-            <span className="text-sm font-medium">
-              {notificationSent 
-                ? "Notification envoyée au préparateur" 
-                : "Notification en attente d'envoi"}
-            </span>
+        <div className="mb-6 flex justify-center">
+          <div className="rounded-full bg-green-100 p-3 w-24 h-24 flex items-center justify-center">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-12 w-12 text-green-600" 
+              viewBox="0 0 20 20" 
+              fill="currentColor"
+            >
+              <path 
+                fillRule="evenodd" 
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
+                clipRule="evenodd" 
+              />
+            </svg>
           </div>
         </div>
-        
-        {!notificationSent && (
-          <button 
-            onClick={handleResendNotification}
-            className="mt-4 text-sandwich hover:text-sandwich-dark underline text-sm"
-          >
-            Renvoyer la notification
-          </button>
-        )}
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">
+          Commande Confirmée
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Votre commande a été confirmée et est en cours de préparation. Vous recevrez bientôt une notification de suivi.
+        </p>
       </motion.div>
       
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-muted/60 mb-8">
-          <div className="flex items-center mb-8">
-            <div className="bg-secondary rounded-lg py-2 px-4 text-sm font-medium">
-              N° de commande: #{Math.floor(Math.random() * 10000).toString().padStart(4, '0')}
+        <div className="grid md:grid-cols-2 gap-8 mb-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-white rounded-xl p-6 shadow-sm border border-muted/60"
+          >
+            <h3 className="font-semibold text-lg mb-4">Détails de la commande</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Date</span>
+                <span>{new Date(orderDetails.orderDate).toLocaleDateString()}</span>
+              </div>
+              
+              {orderDetails.promoCode && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Code Promo</span>
+                  <span className="font-medium">{orderDetails.promoCode}</span>
+                </div>
+              )}
+              
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total</span>
+                <span className="font-semibold">{orderDetails.orderTotal.toFixed(2)} €</span>
+              </div>
             </div>
-          </div>
+          </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground uppercase mb-2">Détails de livraison</h3>
-              <div className="space-y-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="bg-white rounded-xl p-6 shadow-sm border border-muted/60"
+          >
+            <h3 className="font-semibold text-lg mb-4">Informations de livraison</h3>
+            <div className="space-y-2">
+              <div>
                 <p className="font-medium">
                   {orderDetails.customerInfo.firstName} {orderDetails.customerInfo.lastName}
                 </p>
-                <p>
-                  {orderDetails.customerInfo.address}<br />
-                  {orderDetails.customerInfo.zipCode} {orderDetails.customerInfo.city}
-                </p>
-                <p className="flex items-center">
-                  <Phone className="h-4 w-4 mr-2" />
-                  {orderDetails.customerInfo.phone}
-                </p>
+                <p>{orderDetails.customerInfo.phone}</p>
+              </div>
+              <div className="pt-2">
+                <p>{orderDetails.customerInfo.address}</p>
+                <p>{orderDetails.customerInfo.city}, {orderDetails.customerInfo.zipCode}</p>
               </div>
             </div>
-            
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground uppercase mb-2">Informations</h3>
-              <div className="space-y-2">
-                <p>
-                  <span className="text-muted-foreground">Date de commande:</span><br />
-                  {formattedDate}
-                </p>
-                <p>
-                  <span className="text-muted-foreground">Livraison estimée:</span><br />
-                  Aujourd'hui, vers {expectedDelivery}
-                </p>
-                <p>
-                  <span className="text-muted-foreground">Méthode de paiement:</span><br />
-                  Carte bancaire
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <h3 className="text-sm font-medium text-muted-foreground uppercase mb-4">Détails de votre commande</h3>
-          
-          <div className="space-y-4 mb-8">
-            {orderDetails.orderItems.map((item) => (
-              <div key={item.id} className="flex items-center space-x-4 py-3 border-b border-muted">
-                <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden">
-                  <img 
-                    src={item.image || "/placeholder.svg"} 
-                    alt={item.name} 
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="flex-grow">
-                  <div className="flex justify-between">
-                    <h3 className="font-medium">{item.name} <span className="text-muted-foreground">× {item.quantity}</span></h3>
-                    <span className="font-medium">{(item.price * item.quantity).toFixed(2)} €</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-1">{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="border-t border-muted pt-4">
-            <div className="flex justify-between mb-2">
-              <span className="text-muted-foreground">Sous-total</span>
-              <span>{orderDetails.orderTotal.toFixed(2)} €</span>
-            </div>
-            <div className="flex justify-between mb-4">
-              <span className="text-muted-foreground">Frais de livraison</span>
-              <span>{orderDetails.orderTotal > 15 ? "Gratuit" : "2.50 €"}</span>
-            </div>
-            
-            <div className="flex justify-between text-lg font-semibold">
-              <span>Total</span>
-              <span>{(orderDetails.orderTotal + (orderDetails.orderTotal > 15 ? 0 : 2.5)).toFixed(2)} €</span>
-            </div>
-          </div>
+          </motion.div>
         </div>
         
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="bg-white rounded-xl p-6 shadow-sm border border-muted/60 mb-10"
+        >
+          <h3 className="font-semibold text-lg mb-4">Résumé de la commande</h3>
+          
+          <Table>
+            <TableCaption>Récapitulatif des articles commandés</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Produit</TableHead>
+                <TableHead className="text-right">Prix</TableHead>
+                <TableHead className="text-right">Quantité</TableHead>
+                <TableHead className="text-right">Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orderDetails.orderItems.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell className="text-right">{item.price.toFixed(2)} €</TableCell>
+                  <TableCell className="text-right">{item.quantity}</TableCell>
+                  <TableCell className="text-right">{(item.price * item.quantity).toFixed(2)} €</TableCell>
+                </TableRow>
+              ))}
+              
+              {orderDetails.discount && orderDetails.discount > 0 && (
+                <TableRow>
+                  <TableCell className="font-medium text-green-600">Réduction</TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell className="text-right text-green-600">-{orderDetails.discount.toFixed(2)} €</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </motion.div>
+        
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center text-sandwich hover:text-sandwich-dark">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour à l'accueil
+          <Link 
+            to="/" 
+            className="sandwich-button px-6 py-3 inline-block"
+          >
+            Retour à la page d'accueil
           </Link>
         </div>
       </div>

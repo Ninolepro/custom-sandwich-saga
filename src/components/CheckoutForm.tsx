@@ -1,13 +1,14 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { CustomerInfo } from "../types";
+import PromoCodeInput from "./PromoCodeInput";
 
 const CheckoutForm = () => {
-  const { cart, clearCart } = useCart();
+  const { cart, clearCart, promoDetails } = useCart();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<CustomerInfo>({
     firstName: "",
@@ -18,9 +19,29 @@ const CheckoutForm = () => {
     zipCode: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [addressLocked, setAddressLocked] = useState(false);
+
+  // Si un code promo est valide, pré-remplir l'adresse et la bloquer
+  useEffect(() => {
+    if (promoDetails) {
+      setFormData(prevData => ({
+        ...prevData,
+        address: promoDetails.delivery_address,
+        city: promoDetails.delivery_city,
+        zipCode: promoDetails.delivery_zipcode
+      }));
+      setAddressLocked(true);
+    } else {
+      setAddressLocked(false);
+    }
+  }, [promoDetails]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    // Ne pas mettre à jour les champs d'adresse si ils sont verrouillés
+    if (addressLocked && (name === "address" || name === "city" || name === "zipCode")) {
+      return;
+    }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -28,16 +49,22 @@ const CheckoutForm = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate processing
+    // Stocker les détails de commande dans localStorage pour la page de confirmation
+    const orderTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    const discount = promoDetails?.discount || 0;
+    const finalTotal = Math.max(0, orderTotal - discount);
+    
+    localStorage.setItem("orderDetails", JSON.stringify({
+      customerInfo: formData,
+      orderItems: cart,
+      orderDate: new Date().toISOString(),
+      orderTotal: finalTotal,
+      promoCode: promoDetails?.code || null,
+      discount: discount
+    }));
+    
+    // Simulation du traitement
     setTimeout(() => {
-      // Store order details in local storage for confirmation page
-      localStorage.setItem("orderDetails", JSON.stringify({
-        customerInfo: formData,
-        orderItems: cart,
-        orderDate: new Date().toISOString(),
-        orderTotal: cart.reduce((total, item) => total + item.price * item.quantity, 0),
-      }));
-      
       clearCart();
       setIsLoading(false);
       toast.success("Redirection vers la plateforme de paiement...");
@@ -52,7 +79,9 @@ const CheckoutForm = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <PromoCodeInput />
+      
+      <form onSubmit={handleSubmit} className="space-y-6 mt-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label htmlFor="firstName" className="text-sm font-medium">
@@ -104,8 +133,13 @@ const CheckoutForm = () => {
         </div>
         
         <div className="space-y-2">
-          <label htmlFor="address" className="text-sm font-medium">
+          <label htmlFor="address" className="text-sm font-medium flex items-center gap-2">
             Adresse de livraison
+            {addressLocked && (
+              <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-md">
+                Adresse définie par le code promo
+              </span>
+            )}
           </label>
           <input
             id="address"
@@ -114,8 +148,9 @@ const CheckoutForm = () => {
             required
             value={formData.address}
             onChange={handleChange}
-            className="w-full p-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-sandwich/30 transition-all"
+            className={`w-full p-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-sandwich/30 transition-all ${addressLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             placeholder="123 rue du Sandwich"
+            readOnly={addressLocked}
           />
         </div>
         
@@ -131,8 +166,9 @@ const CheckoutForm = () => {
               required
               value={formData.city}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-sandwich/30 transition-all"
+              className={`w-full p-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-sandwich/30 transition-all ${addressLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               placeholder="Paris"
+              readOnly={addressLocked}
             />
           </div>
           
@@ -147,8 +183,9 @@ const CheckoutForm = () => {
               required
               value={formData.zipCode}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-sandwich/30 transition-all"
+              className={`w-full p-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-sandwich/30 transition-all ${addressLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               placeholder="75000"
+              readOnly={addressLocked}
             />
           </div>
         </div>

@@ -6,13 +6,17 @@ import { motion } from "framer-motion";
 import CheckoutForm from "../components/CheckoutForm";
 
 const CheckoutPage = () => {
-  const { cart } = useCart();
+  const { cart, promoDetails } = useCart();
   const navigate = useNavigate();
   
-  const totalAmount = cart.reduce(
+  const subtotal = cart.reduce(
     (total, item) => total + item.price * item.quantity, 
     0
   );
+  
+  const discount = promoDetails?.discount || 0;
+  const shippingFee = subtotal > 15 ? 0 : 2.5;
+  const totalAmount = Math.max(0, subtotal + shippingFee - discount);
   
   useEffect(() => {
     if (cart.length === 0) {
@@ -77,16 +81,24 @@ const CheckoutPage = () => {
             <div className="pt-4 border-t border-muted">
               <div className="flex justify-between mb-2">
                 <span className="text-muted-foreground">Sous-total</span>
-                <span>{totalAmount.toFixed(2)} €</span>
+                <span>{subtotal.toFixed(2)} €</span>
               </div>
+              
+              {promoDetails && (
+                <div className="flex justify-between mb-2 text-green-600">
+                  <span>Réduction (Code: {promoDetails.code})</span>
+                  <span>-{promoDetails.discount.toFixed(2)} €</span>
+                </div>
+              )}
+              
               <div className="flex justify-between mb-4">
                 <span className="text-muted-foreground">Frais de livraison</span>
-                <span>{totalAmount > 15 ? "Gratuit" : "2.50 €"}</span>
+                <span>{subtotal > 15 ? "Gratuit" : "2.50 €"}</span>
               </div>
               
               <div className="flex justify-between text-lg font-semibold">
                 <span>Total</span>
-                <span>{(totalAmount + (totalAmount > 15 ? 0 : 2.5)).toFixed(2)} €</span>
+                <span>{totalAmount.toFixed(2)} €</span>
               </div>
             </div>
           </div>

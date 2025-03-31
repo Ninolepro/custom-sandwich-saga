@@ -9,13 +9,71 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      promo_codes: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string | null
+          delivery_address: string
+          delivery_city: string
+          delivery_zipcode: string
+          discount: number
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string | null
+          delivery_address: string
+          delivery_city: string
+          delivery_zipcode: string
+          discount: number
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string | null
+          delivery_address?: string
+          delivery_city?: string
+          delivery_zipcode?: string
+          discount?: number
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: {
+          uid: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

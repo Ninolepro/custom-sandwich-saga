@@ -1,7 +1,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { CartContextType, CartItemType, Sandwich, OrderDetails } from "../types";
+import { CartContextType, CartItemType, Sandwich, OrderDetails, PromoCodeDetails } from "../types";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -11,9 +12,23 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return savedCart ? JSON.parse(savedCart) : [];
   });
   
+  const [promoCode, setPromoCode] = useState<string>(() => {
+    const savedPromo = localStorage.getItem("sandwich-promo");
+    return savedPromo || "";
+  });
+  
+  const [promoDetails, setPromoDetails] = useState<PromoCodeDetails | null>(null);
+  
   useEffect(() => {
     localStorage.setItem("sandwich-cart", JSON.stringify(cart));
   }, [cart]);
+  
+  useEffect(() => {
+    localStorage.setItem("sandwich-promo", promoCode);
+    if (promoCode) {
+      applyPromoCode(promoCode);
+    }
+  }, [promoCode]);
   
   const addToCart = (item: Sandwich) => {
     setCart(prevCart => {
@@ -45,6 +60,38 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   
   const clearCart = () => {
     setCart([]);
+    setPromoCode("");
+    setPromoDetails(null);
+  };
+  
+  const applyPromoCode = async (code: string): Promise<boolean> => {
+    if (!code) {
+      setPromoDetails(null);
+      return false;
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .from("promo_codes")
+        .select("*")
+        .eq("code", code)
+        .eq("active", true)
+        .single();
+      
+      if (error || !data) {
+        toast.error("Code promo invalide ou expiré");
+        setPromoDetails(null);
+        return false;
+      }
+      
+      setPromoDetails(data as PromoCodeDetails);
+      toast.success(`Code promo appliqué : ${data.discount}€ de réduction!`);
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de l'application du code promo:", error);
+      toast.error("Erreur lors de l'application du code promo");
+      return false;
+    }
   };
   
   const sendOrderNotification = async (orderDetails: OrderDetails): Promise<boolean> => {
@@ -74,7 +121,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       removeFromCart, 
       updateQuantity, 
       clearCart,
-      sendOrderNotification
+      sendOrderNotification,
+      promoCode,
+      setPromoCode,
+      promoDetails,
+      applyPromoCode
     }}>
       {children}
     </CartContext.Provider>

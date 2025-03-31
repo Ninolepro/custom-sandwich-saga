@@ -21,6 +21,10 @@ export interface CartContextType {
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   sendOrderNotification: (orderDetails: OrderDetails) => Promise<boolean>;
+  promoCode: string;
+  setPromoCode: (code: string) => void;
+  promoDetails: PromoCodeDetails | null;
+  applyPromoCode: (code: string) => Promise<boolean>;
 }
 
 export interface OrderDetails {
@@ -28,6 +32,8 @@ export interface OrderDetails {
   customerInfo: CustomerInfo;
   orderDate: string;
   orderTotal: number;
+  promoCode?: string;
+  discount?: number;
 }
 
 export interface CustomerInfo {
@@ -37,4 +43,20 @@ export interface CustomerInfo {
   address: string;
   city: string;
   zipCode: string;
+}
+
+export interface PromoCodeDetails {
+  id: string;
+  code: string;
+  discount: number;
+  delivery_address: string;
+  delivery_city: string;
+  delivery_zipcode: string;
+  active: boolean;
+}
+
+export interface UserRole {
+  id: string;
+  user_id: string;
+  role: "user" | "admin";
 }
