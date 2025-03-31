@@ -27,6 +27,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("sandwich-promo", promoCode);
     if (promoCode) {
       applyPromoCode(promoCode);
+    } else {
+      // Si le promoCode est vide, on réinitialise aussi promoDetails
+      setPromoDetails(null);
     }
   }, [promoCode]);
   
@@ -62,6 +65,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart([]);
     setPromoCode("");
     setPromoDetails(null);
+  };
+  
+  const removePromoCode = () => {
+    setPromoCode("");
+    setPromoDetails(null);
+    localStorage.removeItem("sandwich-promo");
   };
   
   const applyPromoCode = async (code: string): Promise<boolean> => {
@@ -125,7 +134,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       promoCode,
       setPromoCode,
       promoDetails,
-      applyPromoCode
+      applyPromoCode,
+      removePromoCode
     }}>
       {children}
     </CartContext.Provider>

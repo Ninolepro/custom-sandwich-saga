@@ -25,6 +25,7 @@ export interface CartContextType {
   setPromoCode: (code: string) => void;
   promoDetails: PromoCodeDetails | null;
   applyPromoCode: (code: string) => Promise<boolean>;
+  removePromoCode: () => void;
 }
 
 export interface OrderDetails {

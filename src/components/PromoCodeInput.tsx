@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 const PromoCodeInput = () => {
-  const { promoCode, applyPromoCode, setPromoCode, promoDetails } = useCart();
+  const { promoCode, applyPromoCode, setPromoCode, promoDetails, removePromoCode } = useCart();
   const [inputCode, setInputCode] = useState(promoCode);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,8 +25,8 @@ const PromoCodeInput = () => {
   };
 
   const handleRemovePromo = () => {
-    // Réinitialise le code promo dans le contexte du panier
-    setPromoCode("");
+    // Utilisation de la nouvelle fonction dans le contexte
+    removePromoCode();
     // Réinitialise également l'input local
     setInputCode("");
     toast.success("Code promo supprimé");
