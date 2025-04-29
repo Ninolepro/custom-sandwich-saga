@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload } from "lucide-react";
+import FormField from "../common/FormField";
 import { 
   Select, 
   SelectContent, 
@@ -143,16 +144,15 @@ const AddIngredientDrawer = ({ isOpen, onOpenChange, refreshIngredients }: AddIn
             <DrawerTitle>Ajouter un nouvel ingrédient</DrawerTitle>
           </DrawerHeader>
           <div className="p-4 space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Nom</label>
+            <FormField label="Nom" required>
               <Input
                 placeholder="Nom de l'ingrédient"
                 value={newIngredient.name}
                 onChange={(e) => setNewIngredient({...newIngredient, name: e.target.value})}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Type d'ingrédient</label>
+            </FormField>
+            
+            <FormField label="Type d'ingrédient" required>
               <Select 
                 value={newIngredient.type} 
                 onValueChange={(value) => setNewIngredient({...newIngredient, type: value})}
@@ -168,9 +168,9 @@ const AddIngredientDrawer = ({ isOpen, onOpenChange, refreshIngredients }: AddIn
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Prix (€)</label>
+            </FormField>
+            
+            <FormField label="Prix (€)" required>
               <Input
                 type="number"
                 placeholder="0.50"
@@ -179,9 +179,9 @@ const AddIngredientDrawer = ({ isOpen, onOpenChange, refreshIngredients }: AddIn
                 value={newIngredient.price || ""}
                 onChange={(e) => setNewIngredient({...newIngredient, price: parseFloat(e.target.value)})}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Image</label>
+            </FormField>
+            
+            <FormField label="Image">
               <div className="flex items-center gap-4">
                 <div className="flex-shrink-0 h-24 w-24 rounded-md overflow-hidden border">
                   <img 
@@ -214,7 +214,7 @@ const AddIngredientDrawer = ({ isOpen, onOpenChange, refreshIngredients }: AddIn
                   )}
                 </div>
               </div>
-            </div>
+            </FormField>
           </div>
           <DrawerFooter>
             <Button onClick={handleAddIngredient} disabled={isLoading}>

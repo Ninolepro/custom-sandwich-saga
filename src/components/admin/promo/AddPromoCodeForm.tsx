@@ -6,6 +6,7 @@ import { PromoCodeDetails } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
+import FormField from "../common/FormField";
 
 interface AddPromoCodeFormProps {
   onPromoAdded: () => void;
@@ -62,16 +63,15 @@ const AddPromoCodeForm = ({ onPromoAdded }: AddPromoCodeFormProps) => {
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-muted/60 mb-8">
       <h2 className="text-xl font-semibold mb-4">Ajouter un nouveau code promo</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Code</label>
+        <FormField label="Code" required>
           <Input
             placeholder="NOEL2023"
             value={newPromo.code}
             onChange={(e) => setNewPromo({...newPromo, code: e.target.value.toUpperCase()})}
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Réduction (€)</label>
+        </FormField>
+        
+        <FormField label="Réduction (€)" required>
           <Input
             type="number"
             placeholder="10.00"
@@ -80,31 +80,32 @@ const AddPromoCodeForm = ({ onPromoAdded }: AddPromoCodeFormProps) => {
             value={newPromo.discount || ""}
             onChange={(e) => setNewPromo({...newPromo, discount: parseFloat(e.target.value)})}
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Adresse de livraison</label>
+        </FormField>
+        
+        <FormField label="Adresse de livraison" required>
           <Input
             placeholder="123 Rue du Commerce"
             value={newPromo.delivery_address}
             onChange={(e) => setNewPromo({...newPromo, delivery_address: e.target.value})}
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Ville</label>
+        </FormField>
+        
+        <FormField label="Ville" required>
           <Input
             placeholder="Paris"
             value={newPromo.delivery_city}
             onChange={(e) => setNewPromo({...newPromo, delivery_city: e.target.value})}
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Code Postal</label>
+        </FormField>
+        
+        <FormField label="Code Postal" required>
           <Input
             placeholder="75000"
             value={newPromo.delivery_zipcode}
             onChange={(e) => setNewPromo({...newPromo, delivery_zipcode: e.target.value})}
           />
-        </div>
+        </FormField>
+        
         <div className="flex items-end">
           <Button 
             className="w-full" 

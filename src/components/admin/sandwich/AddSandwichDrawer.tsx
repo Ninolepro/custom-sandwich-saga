@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload } from "lucide-react";
+import FormField from "../common/FormField";
 import { 
   Drawer, 
   DrawerClose, 
@@ -127,25 +128,24 @@ const AddSandwichDrawer = ({ isOpen, onOpenChange, refreshSandwiches }: AddSandw
             <DrawerTitle>Ajouter un nouveau sandwich</DrawerTitle>
           </DrawerHeader>
           <div className="p-4 space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Nom</label>
+            <FormField label="Nom" required>
               <Input
                 placeholder="L'Américain"
                 value={newSandwich.name}
                 onChange={(e) => setNewSandwich({...newSandwich, name: e.target.value})}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Description</label>
+            </FormField>
+            
+            <FormField label="Description" required>
               <Textarea
                 placeholder="Steak haché, cheddar, salade, tomate, oignon, sauce spéciale"
                 value={newSandwich.description}
                 onChange={(e) => setNewSandwich({...newSandwich, description: e.target.value})}
                 rows={3}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Prix (€)</label>
+            </FormField>
+            
+            <FormField label="Prix (€)" required>
               <Input
                 type="number"
                 placeholder="8.50"
@@ -154,9 +154,9 @@ const AddSandwichDrawer = ({ isOpen, onOpenChange, refreshSandwiches }: AddSandw
                 value={newSandwich.price || ""}
                 onChange={(e) => setNewSandwich({...newSandwich, price: parseFloat(e.target.value)})}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Image</label>
+            </FormField>
+            
+            <FormField label="Image">
               <div className="flex items-center gap-4">
                 <div className="flex-shrink-0 h-24 w-24 rounded-md overflow-hidden border">
                   <img 
@@ -189,7 +189,7 @@ const AddSandwichDrawer = ({ isOpen, onOpenChange, refreshSandwiches }: AddSandw
                   )}
                 </div>
               </div>
-            </div>
+            </FormField>
           </div>
           <DrawerFooter>
             <Button onClick={handleAddSandwich} disabled={isLoading}>
